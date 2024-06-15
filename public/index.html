@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <title>Socket.IO Example</title>
+</head>
+<body>
+  <ul id="messages"></ul>
+  <form id="form" action="">
+    <input id="username" placeholder="Nombre de usuario" autocomplete="off" /><br>
+    <input id="input" placeholder="Mensaje" autocomplete="off" /><button>Enviar</button>
+  </form>
+
+  <script src="socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    // Manejar la carga de mensajes desde el servidor
+    socket.on('load messages', (messages) => {
+      const messagesList = document.getElementById('messages');
+	  messagesList.innerHTML = '';
+      messages.forEach((msg) => {
+        const item = document.createElement('li');
+        item.textContent = `${msg.username}: ${msg.text}`;
+        messagesList.appendChild(item);
+      });
+    });
+
+    // Manejar el envío de mensajes desde el formulario
+    const form = document.getElementById('form');
+    const usernameInput = document.getElementById('username');
+    const messageInput = document.getElementById('input');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (usernameInput.value && messageInput.value) {
+        const data = {
+          username: usernameInput.value,
+          message: messageInput.value
+        };
+        socket.emit('chat message', data);
+        messageInput.value = '';
+      }
+    });
+
+    // Manejar mensajes recibidos desde el servidor
+    socket.on('chat message', (data) => {
+      const messagesList = document.getElementById('messages');
+      const item = document.createElement('li');
+      item.textContent = `${data.username}: ${data.message}`;
+      messagesList.appendChild(item);
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+  </script>
+</body>
+</html>
